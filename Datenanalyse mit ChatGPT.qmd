@@ -1,0 +1,337 @@
+---
+# Metadaten / meta data
+title: "Bausteine Computergestützter Datenanalyse"
+subtitle: "Datenanalyse mit ChatGPT ???"
+author:
+  - Lukas Arnold
+  - Simone Arnold
+  - Florian Bagemihl
+  - Matthias Baitsch
+  - Marc Fehr
+  - Maik Poetzsch
+  - Sebastian Seipel
+date: today # "2024-03-05" Jahr-Monat-Tag / year-month-day
+
+# Dokumenteneinstellungen / document options
+engine: knitr # für mit CSS zentrierten Text und eine einheitliche Codeausführung von Python und R im Styleguide - keine Relevanz für die Bausteine
+
+## Spracheinstellungen / language settings
+lang: de
+# crossref: 
+  # nte-title: Beispiel -- so nicht :(
+  # nte-prefix: Beispiel -- so nicht :(
+
+## Formatoption / formating options
+format:
+  html:
+    default-image-extension: svg
+    code-copy: true # hover is default
+  pdf:
+    cite-method: biblatex
+    biblio-title: Quellen
+    default-image-extension: pdf # Vektorgrafiken werden als PDF eingebunden / vector grafics are embedded as PDF
+
+## Inhaltsverzeichnis / table of contents
+toc: true
+number-sections: true
+number-depth: 2
+
+## Bibliographie / bibliography
+bibliography: bibliography.bib
+biblio-style: authoryear
+
+## Objekteinstellungen / object options
+cap-location: bottom
+fig-align: center
+
+### Grafiken von R oder Matplotlib / Figures from R or Matplotlib
+# Empfehlung von / suggestion from https://r4ds.hadley.nz/quarto#sec-figures
+fig-width: 6
+fig-asp: 0.618
+
+---
+<!-- Blocksatz / justify text -->
+```{css} 
+#| echo: false
+p {
+  text-align: justify /* alternativ: start, end, center */
+  
+}
+```
+
+&nbsp;
+
+&nbsp;
+
+::: {.border #Lizenz}
+
+<!-- Die Lizenz wird manuell in einer Div erstellt, um Vorgaben für OER hinsichtlich Position und Format zu entsprechen. (licence key im YAML-Header funktioniert in PDF nicht.) -->
+
+*Lizenzangabe mit maschinenlesbaren Icon nach TULLU(BA)-Regel + Jahr: Titel, Urhebende, Lizenz, Link zur Lizenz. Ursprungsort. (Bearbeitung). (Ausnahmen). Jahr*
+
+:::: {layout="[20, 80]"}
+![](skript/00-bilder/CC-BY) <!-- Grafik ohne Titel und Dateiendung einbinden -->  
+
+Bausteine Computergestützter Datenanalyse. Leitfaden zur Erstellung von Bausteinen von Lukas Arnold, Simone Arnold, Florian Bagemihl, Matthias Baitsch, Marc Fehr, Maik Poetzsch und Sebastian Seipel ist lizensiert unter [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.de). Das Werk ist abrufbar auf [GitHub](https://github.com/bausteine-der-datenanalyse/bcd-styleguide). Ausgenommen von der Lizenz sind alle Logos und anders gekennzeichneten Inhalte. 2024
+
+::::
+
+Zitiervorschlag
+
+Arnold, Lukas, Simone Arnold, Matthias Baitsch, Marc Fehr, Maik Poetzsch, und Sebastian Seipel. 2024. „Bausteine Computergestützter Datenanalyse. Leitfaden zur Erstellung von Bausteinen“. https://github.com/bausteine-der-datenanalyse/bcd-styleguide.
+
+BibTeX-Vorlage
+
+```
+@misc{BCD-Styleguide-2024,
+ title={Bausteine Computergestützter Datenanalyse. Leitfaden zur Erstellung von Bausteinen},
+ author={Arnold, Lukas and Arnold, Simone and Baitsch, Matthias and Fehr, Marc and Poetzsch, Maik and Seipel, Sebastian},
+ year={2024},
+ url={https://github.com/bausteine-der-datenanalyse/bcd-styleguide}} 
+```
+
+:::
+
+{{< pagebreak >}}
+
+{{< include _voraussetzungen.md >}}
+
+{{< include _lernziele.md >}}
+
+# Einfache Datenanalyse mit bewährten Methoden
+
+Zunächst wird auf herkömmlichem Wegen eine einfache Datenanalyse durchgeführt. Dann wird versucht, diese mit ChatGPT zu reproduzieren.
+
+
+## Datenanalyse: Bestimmung der Federkonstanten einer Feder
+
+Für eine einfache Datenanalyse schauen wir uns folgendes Problem an: Mit Hilfe eines Ultraschall-Abstandssensors wurde der Abstand zwischen der Unterseite eines Gewichts, welches an einer Feder hängt, und dem Sensor, welcher auf dem Boden befestigt ist, gemessen. Die Feder ist dabei an einem an der Decke befestigten Haken aufgehangen. Der Versuchsaufbau ist in folgender Abbildung dargestellt.
+
+![Versuchsaufbau der Abstandsmessung](skript/00-bilder/aufbau.png)
+
+Die Messdaten sind in der Datei [data.csv](skript/01-daten/data.csv) zu finden. Die erste Spalte beschreibt hierbei die Nummer der Messung, die zweite Spalte beschreibt das an die Feder angehängte Gewicht in Gramm und die dritte Spalte beschreibt den gemessenen Abstand in cm.
+
+Zunächst importieren wir die Daten in das Objekt data und stellen die Daten mit matplotlib in der bekannten Weise dar.
+
+```{python}
+#| echo: fenced
+import numpy as np
+import matplotlib.pyplot as plt
+
+data  =  np.loadtxt("data.csv", delimiter = ';')
+
+fig,ax = plt.subplots(1,1,figsize = (15,10))
+ax.plot(data[:,1], data[:,2], 'x', label = 'Messpunkte')
+ax.set_title('Messdaten', fontsize = 20)
+ax.set_xlabel('Gewicht in g', fontsize = 20)
+ax.set_ylabel('Abstand zum Sensor in cm', fontsize = 20)
+xlabels = ax.get_xticklabels()
+ax.set_xticklabels(xlabels,fontsize=16)
+ylabels = ax.get_yticklabels()
+ax.set_yticklabels(ylabels,fontsize=16)
+ax.grid()
+ax.legend(fontsize = 20)
+```
+
+Wie leicht zu erkennen ist, scheint der Datenpunkt bei einem Abstand von 200 cm ein Messfehler zu sein, diesen eleminieren wir also aus den Daten.
+
+```{python}
+#| echo: fenced
+data_new = np.delete(data,113,0).copy()
+```
+
+Da nun der Ausreisser eliminiert wurde, sollten Mittelwert und Median recht nah nebeneinander liegen. 
+Dies ist im folgenden Plot dargestellt:
+
+```{python}
+#| echo: fenced
+
+import pandas as pd
+mittelwerte = pd.DataFrame(data_new).groupby(1)[2].mean().to_frame().reset_index(drop=False)
+print(mittelwerte)
+
+median = pd.DataFrame(data_new).groupby(1)[2].median().to_frame().reset_index(drop=False)
+print(median)
+
+fig,ax = plt.subplots(1,1,figsize = (15,10))
+
+ax.plot(mittelwerte[1],mittelwerte[2], 'o', color = 'blue', label = "Mittelwerte")
+ax.plot(median[1],median[2], 'o', color = 'red', label = "Mediane")
+ax.set_xlabel('weight in g', fontsize = 20)
+ax.set_ylabel('distance to sensor in cm')
+ax.set_title('Mittelwerte und Median der Messdaten', fontsize = 20)
+ax.set_xlabel('Gewicht in g', fontsize = 20)
+ax.set_ylabel('Abstand zum Sensor in cm', fontsize = 20)
+xlabels = ax.get_xticklabels()
+ax.set_xticklabels(xlabels,fontsize=16)
+ylabels = ax.get_yticklabels()
+ax.set_yticklabels(ylabels,fontsize=16)
+ax.grid()
+ax.legend(fontsize = 20)
+```
+
+Im Folgenden verwenden wir den Mittelwert der Messungen pro Gewicht. 
+
+Da in das Hook'sche Gesetz die Ausdehnung der Feder eingeht
+
+$ F = m \cdot g = k \cdot \Delta x$
+
+müssen wir den gemessenen Abstand noch in die Ausdehnung der Feder umrechnen. Dazu verwenden wir den Mittelwert des Abstandes bei $0 \,g$ als Referenz
+
+$\text{Ausdehnung}(Gewicht) = \text{Abstand}(0 \, g) - \text{Abstand}(Gewicht)$
+
+Um später bewerten zu können, wie präzise die Bestimmung der Federkonstanten ist, werden die Standardabweichungen der Messungen pro Gewicht benötigt
+
+```{python}
+#| echo: fenced
+standardabweichungen = pd.DataFrame(data_new).groupby(1)[2].std().to_frame().reset_index(drop=False)
+
+ausdehnung = mittelwerte[2][0] - mittelwerte[2]
+```
+
+Nun rechnen wir noch das Gewicht über $F = m\cdot g$ in die entsprechende wirkende Kraft um. Damit sehen die Daten nun folgendermaßen aus:
+
+```{python}
+#| echo: fenced
+
+messwerte_uebersicht = pd.concat([
+  pd.DataFrame({"Kraft_in_N":mittelwerte[1]})/1000*9.81,
+  pd.DataFrame({"Ausdehnung_in_cm":ausdehnung}),
+  pd.DataFrame({"Standardabweichung in cm":standardabweichungen[2]})
+  ],axis = 1)
+
+print(messwerte_uebersicht)
+
+fig,ax = plt.subplots(1,1,figsize = (15,10))
+ax.errorbar(mittelwerte[1]/1000*9.81,ausdehnung, yerr = standardabweichungen[2], marker = 'o', linestyle = '', color = 'blue', label = "Mittelwerte mit Standardabweichung")
+ax.set_title('Messdaten mit Mittelwert und Fehler', fontsize = 20)
+ax.set_xlabel('Kraft in N', fontsize = 20)
+ax.set_ylabel('Ausdehnung der Feder in cm', fontsize = 20)
+xlabels = ax.get_xticklabels()
+ax.set_xticklabels(xlabels,fontsize=16)
+ylabels = ax.get_yticklabels()
+ax.set_yticklabels(ylabels,fontsize=16)
+ax.legend(fontsize = 20)
+ax.grid()
+```
+
+Um die Federkonstante zu bestimmen, benötigen wir die Steigung der Geraden. Diese können wir über eine einfache lineare Regression bestimmen. Da wir die Federkonstante $k$ in $\frac{N}{m}$ bestimmen wollen, bietet sich eine umgekehrte Darstellung der Form 
+
+$F(\Delta x) = \text{Kraft} \left( Ausdehnung\right)$ 
+
+an.
+
+```{python}
+#| echo: fenced
+
+Polynom = np.polyfit(ausdehnung, mittelwerte[1]/1000*9.81,1)
+print(Polynom)
+xwerte = np.linspace(0,22,100)
+
+fig,ax = plt.subplots(1,1,figsize = (15,10))
+ax.plot(xwerte, np.polyval(Polynom, xwerte), label = r'lineare Regression, F = 0.33 $\frac{N}{cm}\cdot \Delta x [cm] + 0.01 \,cm$', color = 'red')
+ax.errorbar(ausdehnung, mittelwerte[1]/1000*9.81, xerr = standardabweichungen[2], yerr = .05/1000, marker = 'o', linestyle = '', color = 'blue', label = "Mittelwerte mit Standardabweichung")
+ax.set_title('Messdaten mit Mittelwert und Fehler', fontsize = 20)
+ax.set_ylabel('Wirkende Kraft in N', fontsize = 20)
+ax.set_xlabel('Ausdehnung der Feder in cm', fontsize = 20)
+xlabels = ax.get_xticklabels()
+ax.set_xticklabels(xlabels,fontsize=16)
+ylabels = ax.get_yticklabels()
+ax.set_yticklabels(ylabels,fontsize=16)
+ax.legend(fontsize = 20)
+ax.grid()
+
+```
+
+Die Federkonstante ist also $0.33 \frac{N}{cm}$.
+
+Zum Schluss noch mal alle benötigten Schritte zusammengefasst:
+
+```{python}
+#| echo: fenced
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+#importieren der Daten
+data  =  np.loadtxt("data.csv", delimiter = ';')
+
+#Daten bereinigen
+data_new = np.delete(data,113,0).copy()
+
+#Daten aufbereiten
+mittelwerte = pd.DataFrame(data_new).groupby(1)[2].mean().to_frame().reset_index(drop=False)
+
+median = pd.DataFrame(data_new).groupby(1)[2].median().to_frame().reset_index(drop=False)
+
+standardabweichungen = pd.DataFrame(data_new).groupby(1)[2].std().to_frame().reset_index(drop=False)
+
+ausdehnung = mittelwerte[2][0] - mittelwerte[2]
+
+messwerte_uebersicht = pd.concat([
+  pd.DataFrame({"Kraft_in_N":mittelwerte[1]})/1000*9.81,
+  pd.DataFrame({"Ausdehnung_in_cm":ausdehnung}),
+  pd.DataFrame({"Standardabweichung in cm":standardabweichungen[2]})
+  ],axis = 1)
+
+#Lineare Regression durchführen
+Polynom = np.polyfit(ausdehnung, mittelwerte[1]/1000*9.81,1)
+print(Polynom)
+xwerte = np.linspace(0,22,100)
+
+#Darstellung der Daten
+fig,ax = plt.subplots(1,1,figsize = (15,10))
+ax.plot(xwerte, np.polyval(Polynom, xwerte), label = r'lineare Regression, F = 0.33 $\frac{N}{cm}\cdot \Delta x [cm] + 0.01 \,cm$', color = 'red')
+ax.errorbar(ausdehnung, mittelwerte[1]/1000*9.81, xerr = standardabweichungen[2], yerr = .05/1000, marker = 'o', linestyle = '', color = 'blue', label = "Mittelwerte mit Standardabweichung")
+ax.set_title('Messdaten mit Mittelwert und Fehler', fontsize = 20)
+ax.set_ylabel('Wirkende Kraft in N', fontsize = 20)
+ax.set_xlabel('Ausdehnung der Feder in cm', fontsize = 20)
+xlabels = ax.get_xticklabels()
+ax.set_xticklabels(xlabels,fontsize=16)
+ylabels = ax.get_yticklabels()
+ax.set_yticklabels(ylabels,fontsize=16)
+ax.legend(fontsize = 20)
+ax.grid()
+
+
+```
+
+## Wie funktionert ChatGPT?
+
+Um zu verstehen, welche Möglichkeiten ChatGPT bei der Datenanalyse bietet, muss man zunächst verstehen, wie ChatGPT funktioniert. 
+
+[Wie funktionert ChatGPT](https://youtu.be/L3j5jvqjj88?feature=shared)
+
+Zitat aus [ChatGPT - der ultimative Leitfaden](https://digitaleprofis.de/kuenstliche-intelligenz/chatgpt/chatgpt-der-ultimative-leitfaden/)
+
+- _Verlass auf vorhandene Daten: Sprachmodelle lernen aus einer riesigen Menge an Texten aus dem Internet. Das bedeutet, sie schnappen alles auf – das Gute, das Schlechte und das Verrückte. Wenn die Infos, die sie gelernt haben, fehlerhaft oder verzerrt sind, kann das auch ihre Antworten beeinflussen._
+- *Kein Verständnis der Realität: KI-Modelle verstehen nicht wirklich, was sie sagen. Sie erkennen Muster in den Daten, die sie trainiert haben, und ahmen diese nach. Sie wissen nicht, ob etwas wahr ist, sie wissen nur, was oft zusammen gesagt wird.*
+- *Aktualität: Sprachmodelle sind nur so aktuell wie die Daten, mit denen sie zuletzt trainiert wurden. Wenn wichtige Ereignisse nach diesem Zeitpunkt passieren, ist die KI buchstäblich nicht auf dem neuesten Stand.*
+
+__Und:__ 
+
+- ChatGPT ist ein Sprachbot. Es kann nicht rechnen
+- Die eigenen Daten werden zum Training des Bots weiterverwendet (wenn nicht deaktiviert).
+
+### Aufgabe
+
+Versuchen Sie die Ergebnisse aus [Datenanalyse: Bestimmung der Federkonstanten einer Feder](##Datenanalyse: Bestimmung der Federkonstanten einer Feder) mit ChatGPT zu reproduzieren.
+
+- Welche Unterschiede fallen ihnen auf? 
+- Kann ChatGPT die Werte exakt reproduzieren?
+- Falls Unterschiede auftreten: Woher kommen diese? 
+- Hat ChatGPT Dinge entdeckt, die Sie selber nicht gefunden haben? Falls ja, welche? 
+
+# Das Wichtigste
+
+# Kompetenzquiz
+
+# Übungen
+
+## Übung 1
+
+Generieren Sie sich mit ChatGPT einen Datensatz (Beispielsweise die Messung der CO2 Konzentration in einer Schulklasse an einem Schultag).
+
+Werten Sie diesen Datensatz einmal mit den im Kurz erlernten Methoden der Datenanalyse und einmal mit ChatGPT aus. Vergleichen Sie die Ergebnisse und stellen Sie die Unterschiede dar.
