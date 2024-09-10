@@ -12,14 +12,20 @@ author:
   - Sebastian Seipel
 date: today # "2024-03-05" Jahr-Monat-Tag / year-month-day
 
-# Dokumenteneinstellungen / document options
-engine: knitr # für mit CSS zentrierten Text und eine einheitliche Codeausführung von Python und R im Styleguide - keine Relevanz für die Bausteine
-
 ## Spracheinstellungen / language settings
 lang: de
-# crossref: 
-  # nte-title: Beispiel -- so nicht :(
-  # nte-prefix: Beispiel -- so nicht :(
+language:
+  de:
+    crossref-imp-title: "Definition"
+    crossref-imp-prefix: "Definition"
+    crossref-lst-title: "Code-Block"
+    crossref-lst-prefix: "Code-Block"
+    crossref-nte-title: "Beispiel"
+    crossref-nte-prefix: "Beispiel"
+    crossref-tip-title: "Tipp"
+    crossref-tip-prefix: "Tipp"
+    crossref-wrn-title: "Hinweis"
+    crossref-wrn-prefix: "Hinweis"
 
 ## Formatoption / formating options
 format:
@@ -50,44 +56,30 @@ fig-width: 6
 fig-asp: 0.618
 
 ---
-<!-- Blocksatz / justify text -->
-```{css} 
-#| echo: false
-p {
-  text-align: justify /* alternativ: start, end, center */
-  
-}
-```
-
-&nbsp;
-
-&nbsp;
 
 ::: {.border #Lizenz}
 
 <!-- Die Lizenz wird manuell in einer Div erstellt, um Vorgaben für OER hinsichtlich Position und Format zu entsprechen. (licence key im YAML-Header funktioniert in PDF nicht.) -->
 
-*Lizenzangabe mit maschinenlesbaren Icon nach TULLU(BA)-Regel + Jahr: Titel, Urhebende, Lizenz, Link zur Lizenz. Ursprungsort. (Bearbeitung). (Ausnahmen). Jahr*
-
 :::: {layout="[20, 80]"}
 ![](skript/00-bilder/CC-BY) <!-- Grafik ohne Titel und Dateiendung einbinden -->  
 
-Bausteine Computergestützter Datenanalyse. Leitfaden zur Erstellung von Bausteinen von Lukas Arnold, Simone Arnold, Florian Bagemihl, Matthias Baitsch, Marc Fehr, Maik Poetzsch und Sebastian Seipel ist lizensiert unter [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.de). Das Werk ist abrufbar auf [GitHub](https://github.com/bausteine-der-datenanalyse/bcd-styleguide). Ausgenommen von der Lizenz sind alle Logos und anders gekennzeichneten Inhalte. 2024
+Bausteine Computergestützter Datenanalyse von Lukas Arnold, Simone Arnold, Florian Bagemihl, Matthias Baitsch, Marc Fehr, Maik Poetzsch und Sebastian Seipel. Anwendungsbaustein Datenanalyse mit ChatGPT von Simone Arnold ist lizensiert unter [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.de). Das Werk ist abrufbar auf [GitHub](https://github.com/bausteine-der-datenanalyse/a-Datenanalyse-mit-ChatGPT). Ausgenommen von der Lizenz sind alle Logos und anders gekennzeichneten Inhalte. 2024
 
 ::::
 
 Zitiervorschlag
 
-Arnold, Lukas, Simone Arnold, Matthias Baitsch, Marc Fehr, Maik Poetzsch, und Sebastian Seipel. 2024. „Bausteine Computergestützter Datenanalyse. Leitfaden zur Erstellung von Bausteinen“. https://github.com/bausteine-der-datenanalyse/bcd-styleguide.
+Arnold, Lukas, Simone Arnold, Matthias Baitsch, Marc Fehr, Maik Poetzsch, und Sebastian Seipel. 2024. „Bausteine Computergestützter Datenanalyse. Anwendungsbaustein Datenanalyse mit ChatGPT“. <https://github.com/bausteine-der-datenanalyse/a-Datenanalyse-mit-ChatGPT>.
 
 BibTeX-Vorlage
 
 ```
 @misc{BCD-Styleguide-2024,
- title={Bausteine Computergestützter Datenanalyse. Leitfaden zur Erstellung von Bausteinen},
+ title={Bausteine Computergestützter Datenanalyse. Anwendungsbaustein Datenanalyse mit ChatGPT},
  author={Arnold, Lukas and Arnold, Simone and Baitsch, Matthias and Fehr, Marc and Poetzsch, Maik and Seipel, Sebastian},
  year={2024},
- url={https://github.com/bausteine-der-datenanalyse/bcd-styleguide}} 
+ url={https://github.com/bausteine-der-datenanalyse/a-Datenanalyse-mit-ChatGPT}} 
 ```
 
 :::
@@ -100,27 +92,32 @@ BibTeX-Vorlage
 
 # Einfache Datenanalyse mit bewährten Methoden
 
-Zunächst wird auf herkömmlichem Wegen eine einfache Datenanalyse durchgeführt. Dann wird versucht, diese mit ChatGPT zu reproduzieren.
+Zunächst wird auf herkömmlichen Wegen eine einfache Datenanalyse durchgeführt. Dann wird versucht, diese mit ChatGPT zu reproduzieren.
 
 
 ## Datenanalyse: Bestimmung der Federkonstanten einer Feder
 
 Für eine einfache Datenanalyse schauen wir uns folgendes Problem an: Mit Hilfe eines Ultraschall-Abstandssensors wurde der Abstand zwischen der Unterseite eines Gewichts, welches an einer Feder hängt, und dem Sensor, welcher auf dem Boden befestigt ist, gemessen. Die Feder ist dabei an einem an der Decke befestigten Haken aufgehangen. Der Versuchsaufbau ist in folgender Abbildung dargestellt.
 
-![Versuchsaufbau der Abstandsmessung](skript/00-bilder/aufbau.png)
+![Versuchsaufbau der Abstandsmessung](skript/00-bilder/aufbau.png){fig-alt="Dargestellt ist der soeben im Haupttext beschriebene Versuchsaufbau."}
 
 Die Messdaten sind in der Datei [data.csv](skript/01-daten/data.csv) zu finden. Die erste Spalte beschreibt hierbei die Nummer der Messung, die zweite Spalte beschreibt das an die Feder angehängte Gewicht in Gramm und die dritte Spalte beschreibt den gemessenen Abstand in cm.
 
 Zunächst importieren wir die Daten in das Objekt data und stellen die Daten mit matplotlib in der bekannten Weise dar.
 
 ```{python}
-#| echo: fenced
+
+#| warning: false
+#| fig-align: center 
+#| fig-cap: "Gewicht gegen Sensorabstand"
+#| fig-alt: "Dargestellt sind auf der x-Achse das Gewicht in Gramm, auf der y-Achse der gemessene Abstand zum Sensor. Je höher das Gewicht ist, desto geringer ist der gemessene Abstand."
+
 import numpy as np
 import matplotlib.pyplot as plt
 
-data  =  np.loadtxt("data.csv", delimiter = ';')
+data  =  np.loadtxt("skript/01-daten/data.csv", delimiter = ';')
 
-fig,ax = plt.subplots(1,1,figsize = (15,10))
+fig,ax = plt.subplots(1,1,figsize = (9,6))
 ax.plot(data[:,1], data[:,2], 'x', label = 'Messpunkte')
 ax.set_title('Messdaten', fontsize = 20)
 ax.set_xlabel('Gewicht in g', fontsize = 20)
@@ -136,15 +133,18 @@ ax.legend(fontsize = 20)
 Wie leicht zu erkennen ist, scheint der Datenpunkt bei einem Abstand von 200 cm ein Messfehler zu sein, diesen eleminieren wir also aus den Daten.
 
 ```{python}
-#| echo: fenced
+
 data_new = np.delete(data,113,0).copy()
 ```
 
-Da nun der Ausreisser eliminiert wurde, sollten Mittelwert und Median recht nah nebeneinander liegen. 
+Da nun der Ausreißer eliminiert wurde, sollten Mittelwert und Median recht nah nebeneinander liegen. 
 Dies ist im folgenden Plot dargestellt:
 
 ```{python}
-#| echo: fenced
+#| fig-align: center
+#| fig-cap: Mittelwerte und Median der Messdaten
+#| fig-alt: "Auf der x-Achse ist das von 0 bis ca. 700 Gramm reichende Gewicht, auf der y-Achse der Abstand zum Sensor in cm aufgetragen. Mit blauen Punkten sind die Mittelwerte, mit roten Punkten die Mediane des Abstands zum Sensor für jedes gemessene Gewicht eingezeichnet. Der Abstand zum Sensor fällt mit zunehmendem Gewicht etwa linear."
+#| warning: false
 
 import pandas as pd
 mittelwerte = pd.DataFrame(data_new).groupby(1)[2].mean().to_frame().reset_index(drop=False)
@@ -153,7 +153,7 @@ print(mittelwerte)
 median = pd.DataFrame(data_new).groupby(1)[2].median().to_frame().reset_index(drop=False)
 print(median)
 
-fig,ax = plt.subplots(1,1,figsize = (15,10))
+fig,ax = plt.subplots(1,1,figsize = (9,6))
 
 ax.plot(mittelwerte[1],mittelwerte[2], 'o', color = 'blue', label = "Mittelwerte")
 ax.plot(median[1],median[2], 'o', color = 'red', label = "Mediane")
@@ -174,7 +174,7 @@ Im Folgenden verwenden wir den Mittelwert der Messungen pro Gewicht.
 
 Da in das Hook'sche Gesetz die Ausdehnung der Feder eingeht
 
-$ F = m \cdot g = k \cdot \Delta x$
+$F = m \cdot g = k \cdot \Delta x$
 
 müssen wir den gemessenen Abstand noch in die Ausdehnung der Feder umrechnen. Dazu verwenden wir den Mittelwert des Abstandes bei $0 \,g$ als Referenz
 
@@ -183,7 +183,7 @@ $\text{Ausdehnung}(Gewicht) = \text{Abstand}(0 \, g) - \text{Abstand}(Gewicht)$
 Um später bewerten zu können, wie präzise die Bestimmung der Federkonstanten ist, werden die Standardabweichungen der Messungen pro Gewicht benötigt
 
 ```{python}
-#| echo: fenced
+
 standardabweichungen = pd.DataFrame(data_new).groupby(1)[2].std().to_frame().reset_index(drop=False)
 
 ausdehnung = mittelwerte[2][0] - mittelwerte[2]
@@ -192,7 +192,10 @@ ausdehnung = mittelwerte[2][0] - mittelwerte[2]
 Nun rechnen wir noch das Gewicht über $F = m\cdot g$ in die entsprechende wirkende Kraft um. Damit sehen die Daten nun folgendermaßen aus:
 
 ```{python}
-#| echo: fenced
+#| fig-align: center
+#| fig-cap: Messdaten mit Mittelwert und Fehler
+#| fig-alt: "Auf der x-Achse ist die Kraft in Newton, auf der y-Achse die Federausdehnung in cm aufgetragen. Blaue Punkte markieren die Mittelwerte der Federausdehnung für die für jedes Gewicht wirkende Kraft. Vertikale Fehlerbalken zeigen die Standardabweichung der Daten um die Mittelwerte."
+#| warning: false
 
 messwerte_uebersicht = pd.concat([
   pd.DataFrame({"Kraft_in_N":mittelwerte[1]})/1000*9.81,
@@ -202,7 +205,7 @@ messwerte_uebersicht = pd.concat([
 
 print(messwerte_uebersicht)
 
-fig,ax = plt.subplots(1,1,figsize = (15,10))
+fig,ax = plt.subplots(1,1,figsize = (9,6))
 ax.errorbar(mittelwerte[1]/1000*9.81,ausdehnung, yerr = standardabweichungen[2], marker = 'o', linestyle = '', color = 'blue', label = "Mittelwerte mit Standardabweichung")
 ax.set_title('Messdaten mit Mittelwert und Fehler', fontsize = 20)
 ax.set_xlabel('Kraft in N', fontsize = 20)
@@ -222,13 +225,16 @@ $F(\Delta x) = \text{Kraft} \left( Ausdehnung\right)$
 an.
 
 ```{python}
-#| echo: fenced
+#| fig-align: center
+#| fig-cap: Lineare Regression der Messdaten mit Mittelwert und Fehler
+#| fig-alt: "Auf der y-Achse ist die Kraft in Newton, auf der x-Achse die Federausdehnung in cm aufgetragen. Blaue Punkte markieren die Mittelwerte der Federausdehnung für die für jedes Gewicht wirkende Kraft. Horizontale Fehlerbalken zeigen die Standardabweichung der Daten um die Mittelwerte. Außerdem ist die Regressionsgerade eingezeichnet."
+#| warning: false
 
 Polynom = np.polyfit(ausdehnung, mittelwerte[1]/1000*9.81,1)
 print(Polynom)
 xwerte = np.linspace(0,22,100)
 
-fig,ax = plt.subplots(1,1,figsize = (15,10))
+fig,ax = plt.subplots(1,1,figsize = (9,6))
 ax.plot(xwerte, np.polyval(Polynom, xwerte), label = r'lineare Regression, F = 0.33 $\frac{N}{cm}\cdot \Delta x [cm] + 0.01 \,cm$', color = 'red')
 ax.errorbar(ausdehnung, mittelwerte[1]/1000*9.81, xerr = standardabweichungen[2], yerr = .05/1000, marker = 'o', linestyle = '', color = 'blue', label = "Mittelwerte mit Standardabweichung")
 ax.set_title('Messdaten mit Mittelwert und Fehler', fontsize = 20)
@@ -238,7 +244,7 @@ xlabels = ax.get_xticklabels()
 ax.set_xticklabels(xlabels,fontsize=16)
 ylabels = ax.get_yticklabels()
 ax.set_yticklabels(ylabels,fontsize=16)
-ax.legend(fontsize = 20)
+ax.legend(fontsize = 10)
 ax.grid()
 
 ```
@@ -248,15 +254,16 @@ Die Federkonstante ist also $0.33 \frac{N}{cm}$.
 Zum Schluss noch mal alle benötigten Schritte zusammengefasst:
 
 ```{python}
-#| echo: fenced
 
+#| output: false
+#| warnings: false
 
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
 #importieren der Daten
-data  =  np.loadtxt("data.csv", delimiter = ';')
+data  =  np.loadtxt("skript/01-daten/data.csv", delimiter = ';')
 
 #Daten bereinigen
 data_new = np.delete(data,113,0).copy()
@@ -282,7 +289,7 @@ print(Polynom)
 xwerte = np.linspace(0,22,100)
 
 #Darstellung der Daten
-fig,ax = plt.subplots(1,1,figsize = (15,10))
+fig,ax = plt.subplots(1,1,figsize = (9,6))
 ax.plot(xwerte, np.polyval(Polynom, xwerte), label = r'lineare Regression, F = 0.33 $\frac{N}{cm}\cdot \Delta x [cm] + 0.01 \,cm$', color = 'red')
 ax.errorbar(ausdehnung, mittelwerte[1]/1000*9.81, xerr = standardabweichungen[2], yerr = .05/1000, marker = 'o', linestyle = '', color = 'blue', label = "Mittelwerte mit Standardabweichung")
 ax.set_title('Messdaten mit Mittelwert und Fehler', fontsize = 20)
